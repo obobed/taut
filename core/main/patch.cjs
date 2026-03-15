@@ -255,6 +255,23 @@ electron.Menu.setApplicationMenu = function (menu) {
   const newMenu = electron.Menu.buildFromTemplate(menuTemplate)
   return originalSetApplicationMenu.call(this, newMenu)
 }
+const originalSetWindowMenu = electron.BrowserWindow.prototype.setMenu
+electron.BrowserWindow.prototype.setMenu = function (menu) {
+  if (menu == null) {
+    return originalSetWindowMenu.call(this, menu)
+  }
+  /** @type {(Electron.MenuItem | Electron.MenuItemConstructorOptions)[]} */
+  const menuTemplate = [...menu.items]
+  if (menuTemplate[menuTemplate.length - 1].role === 'help') {
+    // Insert before Help menu
+    menuTemplate.splice(menuTemplate.length - 1, 0, tautMenu)
+  } else {
+    // Append to end
+    menuTemplate.push(tautMenu)
+  }
+  const newMenu = electron.Menu.buildFromTemplate(menuTemplate)
+  return originalSetWindowMenu.call(this, newMenu)
+}
 
 module.exports = {
   BROWSER,
